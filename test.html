@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bootstrap 101 Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="public/css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+    <link rel="stylesheet" href="public/css/bootstrap.min.css">
+    <link rel="stylesheet" href="public/src/bootstrap-table.css">
+
+  </head>
+  <body>
+  <table id="table"></table>
+  
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+    <script src="public/src/bootstrap-table.js"></script>
+
+  <script type="text/javascript">
+
+  var jsonResp = [];
+  $.ajax({
+  url: "http://localhost:3000/test",
+  success: function(data){
+    jsonResp = data;
+        $('#table').bootstrapTable({
+            sortName: 'name',
+            sortOrder: 'desc',
+            search: 'true',
+            smartDispay: 'true',
+            columns: [{
+                sortable: 'false',
+                field: 'id',
+                title: 'Item ID'
+            }, {
+                sortable: 'true',
+                field: 'name',
+                title: 'Item Name'
+            }, {
+                // sortable: 'false',
+                field: 'price',
+                title: 'Item Price'
+            }],
+            data: jsonResp
+        });
+    }
+  });
+  </script>
+    <script src="public/js/bootstrap.min.js"></script>
+  </body>
+</html>
