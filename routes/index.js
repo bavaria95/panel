@@ -1,9 +1,35 @@
 var express = require('express');
 var router = express.Router();
 
-/* GET home page. */
+var sqlite3 = require('sqlite3').verbose();
+var db = new sqlite3.Database('panel.db');
+var check;
+
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
+});
+
+function add_name_to_db(res, name, surname) {
+	var q = 'INSERT INTO STUDENTS(Name, Surname) VALUES(' + '"' + name + '", "' + surname + '")';
+	db.serialize(function() {
+	  db.run(q);
+	});
+	db.close();
+}
+
+function getAllGroups() {
+	db.all('SELECT * FROM Groups', function(err, row) {
+		console.log(row);
+	});
+}
+
+router.get('/authorization', function(req, res, next) {
+  var name = req.query.name;
+  var surname = req.query.surname;
+  res.send(getAllGroups());
+  // add_name_to_db(res, name, surname);
+  // res.send(name + '<br>' + surname);
+  next();
 });
 
 router.get('/login', function(req, res, next) {
