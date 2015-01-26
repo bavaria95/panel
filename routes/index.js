@@ -9,31 +9,61 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
-function add_name_to_db(res, name, surname) {
-	var q = 'INSERT INTO STUDENTS(Name, Surname) VALUES(' + '"' + name + '", "' + surname + '")';
+
+function add_name_to_db(name, surname, group) {
+	var q = 'INSERT INTO STUDENTS(Name, Surname, Groups) VALUES(' + '"' + name + '", "' + surname + '", ' + group + ')';
+	console.log(q);
 	db.serialize(function() {
 	  db.run(q);
 	});
-	db.close();
 }
 
-function getAllGroups() {
-	db.all('SELECT * FROM Groups', function(err, row) {
-		console.log(row);
-	});
-}
 
-router.get('/authorization', function(req, res, next) {
+router.get('/students', function(req, res, next) {
   var name = req.query.name;
   var surname = req.query.surname;
-  res.send(getAllGroups());
-  // add_name_to_db(res, name, surname);
-  // res.send(name + '<br>' + surname);
-  next();
+  var group = req.query.group;
+
+  add_name_to_db(name, surname, group);
+
+  /*getting all students*/
+  var students = [];
+
+    function dbHandler(err, row){
+        if (err) {
+            console.log("Error: " + err);
+        } else {
+            students.push(row);
+        }
+    }    
+
+    function dbFinal(){
+        // console.log('eventually: ' + students);
+  		res.render('students', {'students' : students, 'current_student' : {'Name': name, 'Surname': surname}});
+    }
+
+    db.each("SELECT * FROM Students", dbHandler, dbFinal);
 });
 
+
 router.get('/login', function(req, res, next) {
-  res.render('login', { username: 'name', password: 'password'});
+  	/*getting all groups*/
+  	var tab = [];
+
+    function dbHandler(err, row){
+        if (err) {
+            console.log("Error: " + err);
+        } else {
+            tab.push(row);
+        }
+    }    
+
+    function dbFinal(){
+        console.log(tab);
+  		res.render('login', {'groups' : tab});
+    }
+
+    db.each("SELECT * FROM Groups", dbHandler, dbFinal);
 });
 
 router.get('/test', function(req, res, next) {

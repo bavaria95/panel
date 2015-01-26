@@ -3,26 +3,46 @@
   <head>
     <title>Login</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
+
   </head>
   <body>
-	    <form class="form-horizontal" action="authorization" method="get">
-	  <div class="control-group">
-	    <label class="control-label" for="name">Name</label>
-	    <div class="controls">
-	      <input type="text" id="name" placeholder="Name" name="name">
-	    </div>
-	  </div>
-	  <div class="control-group">
-	    <label class="control-label" for="surname">Surname</label>
-	    <div class="controls">
-	      <input type="text" id="surname" placeholder="Surname" name="surname">
-	    </div>
-	  </div>
-	  <div class="control-group">
-	    <div class="controls">
-	      <button type="submit" class="btn">Sign in</button>
-	    </div>
-	  </div>
-	</form>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+	    <div style="position:absolute; top:8%">
+		    <form class="form-horizontal" id="log" action="students" method="get">
+		  		<div class="control-group" style="position:relative; left:384px">
+		    		<label class="control-label" for="name">Name</label>
+		    		<div class="controls" style="position:absolute; left:30px">
+		      			<input type="text" id="name" placeholder="Name" name="name">
+		    		</div>
+		  		</div>
+
+		  		<div class="control-group" style="position:relative; left:403px">
+		    		<label class="control-label" for="surname">Surname</label>
+		    		<div class="controls" style="position:absolute; left:10px">
+		      			<input type="text" id="surname" placeholder="Surname" name="surname">
+		    		</div>
+		  		</div>
+
+		  		<div class="control-group" style="position:relative; left:387px">
+			  		<label class="control-label" for="group">Group</label>
+			  		<div class="controls" style="position:relative; left:25px">
+					    <select name="group" form="log">
+							<% for(var i=0; i<groups.length; i++) { %>
+			   					<option value="<%= groups[i].ID %>"><%= groups[i].Day + ' ' + groups[i].Time %></option>
+							<% } %>
+					  		
+						</select>
+					</div>
+				</div>
+
+		  		<div class="control-group">
+		    		<div class="controls" style="position:relative; top:5px; left:327px">
+		      			<button type="submit" class="btn">Sign in</button>
+				    </div>
+				</div>
+			</form>
+		</div>
   </body>
 </html>
