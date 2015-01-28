@@ -135,8 +135,8 @@ router.get('/student/:id', function(req, res) {
 
 					    function dbFinal5(){
 					    	
-							writeResponse(res, dict);
-					  		// res.render('login', {'groups' : tab});
+							// writeResponse(res, dict);
+					  		res.render('student', dict);
 					    }
 
 					    db.each("SELECT * FROM Lessons WHERE Groups = " + dict['group_id'] + " ORDER BY Date", dbHandler5, dbFinal5); 
@@ -145,7 +145,7 @@ router.get('/student/:id', function(req, res) {
 				    db.each("SELECT * FROM Notifications WHERE Student = " + id + " OR Groups = " + dict['group_id'], dbHandler4, dbFinal4); 
 			    }
 
-			    db.each("SELECT * FROM Students WHERE Groups = (SELECT ID FROM Groups WHERE Day = '" + dict['group_day'] + "' AND Time = '" + dict['group_time'] + "')", dbHandler3, dbFinal3);
+			    db.each("SELECT * FROM Students AS s OUTER LEFT JOIN Referats AS r ON s.ID = r.Student WHERE s.Groups = " + dict['group_id'], dbHandler3, dbFinal3);
 			}
 
 		    db.each("SELECT * FROM Referats WHERE Student IS NULL", dbHandler2, dbFinal2);
