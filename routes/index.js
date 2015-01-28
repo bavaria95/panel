@@ -10,14 +10,32 @@ router.get('/', function(req, res, next) {
 });
 
 
+router.get('/login', function(req, res, next) {
+  	/*getting all groups*/
+  	var tab = [];
+
+    function dbHandler(err, row){
+        if (err) {
+            console.log("Error: " + err);
+        } else {
+            tab.push(row);
+        }
+    }    
+
+    function dbFinal(){
+  		res.render('login', {'groups' : tab});
+    }
+
+    db.each("SELECT * FROM Groups", dbHandler, dbFinal);
+});
+
+
 function add_name_to_db(name, surname, group) {
-	var q = 'INSERT INTO STUDENTS(Name, Surname, Groups) VALUES(' + '"' + name + '", "' + surname + '", ' + group + ')';
-	console.log(q);
+	var q = 'INSERT INTO Students(Name, Surname, Groups) VALUES(' + '"' + name + '", "' + surname + '", ' + group + ')';
 	db.serialize(function() {
 	  db.run(q);
 	});
 }
-
 
 router.get('/students', function(req, res, next) {
   var name = req.query.name;
@@ -38,7 +56,6 @@ router.get('/students', function(req, res, next) {
     }    
 
     function dbFinal(){
-        // console.log('eventually: ' + students);
   		res.render('students', {'students' : students, 'current_student' : {'Name': name, 'Surname': surname}});
     }
 
@@ -46,25 +63,117 @@ router.get('/students', function(req, res, next) {
 });
 
 
-router.get('/login', function(req, res, next) {
-  	/*getting all groups*/
-  	var tab = [];
+router.get('/student/:id', function(req, res) {
+	var id = req.params.id;
+	var dict = {};
+	dict['refs'] = [];
+	dict['students_from_group'] = [];
+	dict['notifications'] = [];
+	dict['lessons'] = [];
+
+	function writeResponse(res, d) {
+		var r = d['name'];
+		console.log(d);
+		res.send(r);
+	}
 
     function dbHandler(err, row){
-        if (err) {
+        if (err)
             console.log("Error: " + err);
-        } else {
-            tab.push(row);
+        else {
+        	dict['group_id'] = row.ID;
+            dict['group_day'] = row.Day;
+            dict['group_time'] = row.Time;
         }
     }    
 
     function dbFinal(){
-        console.log(tab);
-  		res.render('login', {'groups' : tab});
-    }
 
-    db.each("SELECT * FROM Groups", dbHandler, dbFinal);
+		function dbHandler1(err, row){
+	        if (err)
+	            console.log("Error: " + err);
+	      	else {
+	            dict['name'] = row.Name;
+	            dict['surname'] = row.Surname;
+	        }
+	    }    
+
+	    function dbFinal1(){
+	    	
+			function dbHandler2(err, row){
+		        if (err)
+		            console.log("Error: " + err);
+		        else 
+		            dict['refs'].push(row);
+		    }    
+
+		    function dbFinal2(){
+			    function dbHandler3(err, row){
+			        if (err)
+			            console.log("Error: " + err);
+			        else 
+			            dict['students_from_group'].push(row);
+			    }    
+
+			    function dbFinal3(){
+			    	
+					function dbHandler4(err, row){
+			        if (err)
+			            console.log("Error: " + err);
+			        else 
+			            dict['notifications'].push(row);
+				    }    
+
+				    function dbFinal4(){
+				    	
+						function dbHandler5(err, row){
+					        if (err)
+					            console.log("Error: " + err);
+					        else 
+					            dict['lessons'].push(row);
+					    }    
+
+					    function dbFinal5(){
+					    	
+							writeResponse(res, dict);
+					  		// res.render('login', {'groups' : tab});
+					    }
+
+					    db.each("SELECT * FROM Lessons WHERE Groups = " + dict['group_id'] + " ORDER BY Date", dbHandler5, dbFinal5); 
+				    }
+
+				    db.each("SELECT * FROM Notifications WHERE Student = " + id + " OR Groups = " + dict['group_id'], dbHandler4, dbFinal4); 
+			    }
+
+			    db.each("SELECT * FROM Students WHERE Groups = (SELECT ID FROM Groups WHERE Day = '" + dict['group_day'] + "' AND Time = '" + dict['group_time'] + "')", dbHandler3, dbFinal3);
+			}
+
+		    db.each("SELECT * FROM Referats WHERE Student IS NULL", dbHandler2, dbFinal2);
+		}
+
+	    db.each("SELECT * FROM Students WHERE ID = " + id, dbHandler1, dbFinal1);
+	}
+
+    db.each("SELECT * FROM Groups WHERE ID = (SELECT Groups FROM STUDENTS WHERE ID = " + id + ")", dbHandler, dbFinal);
 });
+
+router.get('/grades/:id', function(req, res, next) {
+	var id = req.params.id;
+	var grades = [];
+	function dbHandler(err, row){
+        if (err)
+            console.log("Error: " + err);
+        else 
+            grades.push(row);
+    }    
+
+    function dbFinal(){
+		res.header("Access-Control-Allow-Origin", "*");
+	  	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+		res.json(grades);
+    }
+	db.each("SELECT * FROM Grades WHERE Student = " + id, dbHandler, dbFinal); 
+})
 
 router.get('/test', function(req, res, next) {
 	var d = [
